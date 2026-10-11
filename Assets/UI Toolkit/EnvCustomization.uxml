@@ -1,0 +1,18 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/EnvCustomization.uss?fileID=7433441132597879392&amp;guid=7763bc65b2c588c44a47ef4be92b6426&amp;type=3#EnvCustomization"/>
+    <ui:VisualElement name="FullScreen" style="flex-grow: 1; flex-direction: row;">
+        <ui:VisualElement name="ControllPanel" style="flex-grow: 1; align-self: stretch; width: 593px; align-items: auto; justify-content: space-between; flex-direction: column; background-color: rgba(255, 255, 255, 0.69); border-top-left-radius: 50px; border-top-right-radius: 50px; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px;">
+            <ui:VisualElement name="EnvSetting" style="flex-grow: 0; align-items: stretch; flex-direction: column; align-self: stretch; justify-content: flex-start; position: absolute; flex-wrap: nowrap; border-top-width: 50px; border-right-width: 50px; border-bottom-width: 50px; border-left-width: 50px; border-top-left-radius: 100px; border-top-right-radius: 100px; border-bottom-right-radius: 100px; border-bottom-left-radius: 100px; flex-shrink: 0; top: 0; left: 0; bottom: 540px; right: 0;">
+                <ui:Label text="EnvSetting" class="subtilte" style="-unity-text-align: middle-left; font-size: 100px; white-space: nowrap; -unity-font-definition: url(&quot;project://database/Assets/font/Silver.ttf?fileID=12800000&amp;guid=a56e52fe48afdd641bf405a0f934cac6&amp;type=3#Silver&quot;);"/>
+                <ui:Toggle label="Rock" name="Toggle" style="flex-direction: row; align-items: center; align-content: auto; align-self: flex-start; -unity-font-definition: url(&quot;project://database/Assets/font/Silver.ttf?fileID=12800000&amp;guid=a56e52fe48afdd641bf405a0f934cac6&amp;type=3#Silver&quot;); font-size: 50px; justify-content: flex-start; -unity-font-style: normal;"/>
+                <ui:Slider label="Camp Fire Size" value="42" high-value="100" style="font-size: 40px;"/>
+                <ui:Slider label="Light Intensity" value="42" high-value="100" style="font-size: 40px;"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="Atomosphere" style="flex-grow: 0; align-self: stretch; flex-direction: column; align-items: flex-start; justify-content: flex-start; flex-shrink: 0; position: absolute; top: 540px; right: 6px; left: 0; bottom: 0; -unity-font-definition: url(&quot;project://database/Assets/font/Silver.ttf?fileID=12800000&amp;guid=a56e52fe48afdd641bf405a0f934cac6&amp;type=3#Silver&quot;); border-top-width: 50px; border-right-width: 50px; border-bottom-width: 50px; border-left-width: 50px; border-top-left-radius: 100px; border-top-right-radius: 100px; border-bottom-right-radius: 100px; border-bottom-left-radius: 100px;">
+                <ui:Label text="Atomosphere" class="subtilte" style="font-size: 100px; -unity-text-align: middle-left;"/>
+                <ui:DropdownField label="Env Theme" style="font-size: 50px; justify-content: space-evenly; align-self: stretch;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="SceneArea" style="flex-grow: 1; width: 597px; background-color: rgba(0, 0, 0, 0); align-self: flex-end; flex-direction: column; height: 1077px; color: rgb(0, 0, 0);"/>
+    </ui:VisualElement>
+</ui:UXML>
