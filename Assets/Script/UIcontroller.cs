@@ -21,6 +21,7 @@ public class UIController : MonoBehaviour
     public TMP_Dropdown beltTypeDropDown, beltColorDropDown;
     public TMP_Dropdown legsTypeDropDown, legsColorDropDown;
     public TMP_Dropdown feetTypeDropDown, feetColorDropDown;
+    public Slider scaleSlider;
 
     [Header("Character Reference")]
     //Character GameObject
@@ -47,6 +48,7 @@ public class UIController : MonoBehaviour
         setupDropDownOptions();
         activateFirstItem();
         enableFacePanel();
+        setupScaleSlider();
     }
 
     // Update is called once per frame
@@ -152,9 +154,18 @@ public class UIController : MonoBehaviour
         int selectedIndex = feetTypeDropDown.value * feetColorDropDown.options.Count + feetColorDropDown.value;
         activateItem(feetGameObject, selectedIndex);
     }
+    void setupScaleSlider()
+    {
+        if (scaleSlider == null || characterGameObject == null)
+            return;
+
+        scaleSlider.onValueChanged.AddListener(onScaleValueChanged);
+        onScaleValueChanged(scaleSlider.value);
+    }
+
     public void onScaleValueChanged(float value)
     {
-        this.characterGameObject.transform.localScale = new Vector3(value, value, value);
+        characterGameObject.transform.localScale = new Vector3(0.1f + value , 0.1f + value, 0.1f + value);
     }
     private void setupDropDownOptions()
     {
