@@ -232,4 +232,102 @@ public class UIController : MonoBehaviour
                 item.transform.GetChild(i).gameObject.SetActive(true);
         }
     }
+
+    public CharacterOutfitSnapshot CaptureCurrentOutfit()
+    {
+        return new CharacterOutfitSnapshot
+        {
+            hairType = hairTypeDropDown != null ? hairTypeDropDown.value : 0,
+            hairColor = hairColorDropDown != null ? hairColorDropDown.value : 0,
+            faceHairType = faceHairTypeDropDown != null ? faceHairTypeDropDown.value : 0,
+            faceHairColor = faceHairColorDropDown != null ? faceHairColorDropDown.value : 0,
+            eyesType = eyesTypeDropDown != null ? eyesTypeDropDown.value : 0,
+            eyesColor = eyesColorDropDown != null ? eyesColorDropDown.value : 0,
+            eyebrowType = eyebrowTypeDropDown != null ? eyebrowTypeDropDown.value : 0,
+            eyebrowColor = eyebrowColorDropDown != null ? eyebrowColorDropDown.value : 0,
+            noseType = noseTypeDropDown != null ? noseTypeDropDown.value : 0,
+            earType = earTypeDropDown != null ? earTypeDropDown.value : 0,
+            headType = headTypeDropDown != null ? headTypeDropDown.value : 0,
+            headColor = headColorDropDown != null ? headColorDropDown.value : 0,
+            chestType = chestTypeDropDown != null ? chestTypeDropDown.value : 0,
+            chestColor = chestColorDropDown != null ? chestColorDropDown.value : 0,
+            armType = armTypeDropDown != null ? armTypeDropDown.value : 0,
+            armColor = armColorDropDown != null ? armColorDropDown.value : 0,
+            beltType = beltTypeDropDown != null ? beltTypeDropDown.value : 0,
+            beltColor = beltColorDropDown != null ? beltColorDropDown.value : 0,
+            legsType = legsTypeDropDown != null ? legsTypeDropDown.value : 0,
+            legsColor = legsColorDropDown != null ? legsColorDropDown.value : 0,
+            feetType = feetTypeDropDown != null ? feetTypeDropDown.value : 0,
+            feetColor = feetColorDropDown != null ? feetColorDropDown.value : 0,
+            scale = scaleSlider != null ? scaleSlider.value : 0f
+        };
+    }
+
+    public void ApplyOutfit(CharacterOutfitSnapshot snapshot)
+    {
+        if (snapshot == null)
+            return;
+
+        SetDropDownValue(hairTypeDropDown, snapshot.hairType);
+        SetDropDownValue(hairColorDropDown, snapshot.hairColor);
+        onHairItemChanged();
+
+        SetDropDownValue(faceHairTypeDropDown, snapshot.faceHairType);
+        SetDropDownValue(faceHairColorDropDown, snapshot.faceHairColor);
+        onFaceHairItemChanged();
+
+        SetDropDownValue(eyesTypeDropDown, snapshot.eyesType);
+        SetDropDownValue(eyesColorDropDown, snapshot.eyesColor);
+        onEyesItemChanged();
+
+        SetDropDownValue(eyebrowTypeDropDown, snapshot.eyebrowType);
+        SetDropDownValue(eyebrowColorDropDown, snapshot.eyebrowColor);
+        onEyebrowItemChanged();
+
+        SetDropDownValue(noseTypeDropDown, snapshot.noseType);
+        onNoseItemChanged();
+
+        SetDropDownValue(earTypeDropDown, snapshot.earType);
+        onEarItemChanged();
+
+        SetDropDownValue(headTypeDropDown, snapshot.headType);
+        SetDropDownValue(headColorDropDown, snapshot.headColor);
+        onHeadItemChanged();
+
+        SetDropDownValue(chestTypeDropDown, snapshot.chestType);
+        SetDropDownValue(chestColorDropDown, snapshot.chestColor);
+        onChestItemChanged();
+
+        SetDropDownValue(armTypeDropDown, snapshot.armType);
+        SetDropDownValue(armColorDropDown, snapshot.armColor);
+        onArmItemChanged();
+
+        SetDropDownValue(beltTypeDropDown, snapshot.beltType);
+        SetDropDownValue(beltColorDropDown, snapshot.beltColor);
+        onBeltItemChanged();
+
+        SetDropDownValue(legsTypeDropDown, snapshot.legsType);
+        SetDropDownValue(legsColorDropDown, snapshot.legsColor);
+        onLegItemChanged();
+
+        SetDropDownValue(feetTypeDropDown, snapshot.feetType);
+        SetDropDownValue(feetColorDropDown, snapshot.feetColor);
+        onFeetItemChanged();
+
+        if (scaleSlider != null)
+        {
+            scaleSlider.SetValueWithoutNotify(snapshot.scale);
+            onScaleValueChanged(snapshot.scale);
+        }
+    }
+
+    static void SetDropDownValue(TMP_Dropdown dropDown, int value)
+    {
+        if (dropDown == null || dropDown.options == null || dropDown.options.Count == 0)
+            return;
+
+        int clamped = Mathf.Clamp(value, 0, dropDown.options.Count - 1);
+        dropDown.SetValueWithoutNotify(clamped);
+        dropDown.RefreshShownValue();
+    }
 }
