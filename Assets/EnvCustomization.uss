@@ -3,3 +3,8 @@
 
 .subtilte {
 }
+
+.Toggle {
+    font-size: 50px;
+    -unity-font-definition: url("project://database/Assets/font/Silver.ttf?fileID=12800000&guid=a56e52fe48afdd641bf405a0f934cac6&type=3#Silver");
+}
