@@ -9395,6 +9395,7 @@ GameObject:
   - component: {fileID: 717507868}
   - component: {fileID: 717507867}
   - component: {fileID: 717507869}
+  - component: {fileID: 717507870}
   m_Layer: 5
   m_Name: UIDocument
   m_TagString: Untagged
@@ -9454,6 +9455,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnvUIController
   uiDocument: {fileID: 717507867}
   envManager: {fileID: 1535571043}
+--- !u!114 &717507870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 717507866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94c01fa18ce64e74fa3b934835efeb51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraUIController
+  uiDocument: {fileID: 717507867}
+  cameraController: {fileID: 1500945956}
 --- !u!1001 &728016130
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12417,6 +12432,50 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8456015433920080143, guid: beba23371aca565428a28444269288db, type: 3}
   m_PrefabInstance: {fileID: 1155814072}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1165001884
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1165001886}
+  - component: {fileID: 1165001885}
+  m_Layer: 0
+  m_Name: NetworkManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1165001885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1165001884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5823d8f8b3a502438910a78f5ebc499, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
+--- !u!4 &1165001886
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1165001884}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1171429485
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14598,6 +14657,52 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8456015433920080143, guid: beba23371aca565428a28444269288db, type: 3}
   m_PrefabInstance: {fileID: 1489475468}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1500945955
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1500945957}
+  - component: {fileID: 1500945956}
+  m_Layer: 0
+  m_Name: CameraController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1500945956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500945955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 143032b537ecdd549936561e0f213ee4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraController
+  camTransform: {fileID: 963194228}
+  moveSpeed: 1
+--- !u!4 &1500945957
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500945955}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1510590593
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19974,3 +20079,5 @@ SceneRoots:
   - {fileID: 717507868}
   - {fileID: 1661520902}
   - {fileID: 1535571044}
+  - {fileID: 1500945957}
+  - {fileID: 1165001886}

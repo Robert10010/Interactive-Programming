@@ -55,6 +55,9 @@ public class EnvironmentManager : MonoBehaviour
             fence[i].SetActive(v);
         }
     }
+    public void activateCampFire(bool v){
+        campFire_Object.SetActive(v);
+    }
     public void setCampFireSize(float scale){
         campFire_Object.transform.localScale = Vector3.one * scale;
     }

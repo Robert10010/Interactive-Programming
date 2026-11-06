@@ -1,28 +1,40 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/EnvCustomization.uss?fileID=7433441132597879392&amp;guid=7763bc65b2c588c44a47ef4be92b6426&amp;type=3#EnvCustomization"/>
-    <ui:VisualElement name="FullScreen" style="flex-grow: 1; flex-direction: row;">
-        <ui:VisualElement name="ControllPanel" style="flex-grow: 1; align-self: auto; width: 20%; align-items: auto; justify-content: flex-start; flex-direction: column; background-color: rgba(255, 255, 255, 0.69); border-top-left-radius: 50px; border-top-right-radius: 50px; border-bottom-right-radius: 50px; border-bottom-left-radius: 50px; align-content: flex-start; padding-top: 50px; padding-right: 50px; padding-bottom: 50px; padding-left: 50px;">
-            <ui:VisualElement name="EnvSetting" style="flex-grow: 0; align-items: stretch; flex-direction: column; align-self: stretch; justify-content: flex-start; position: absolute; flex-wrap: nowrap; border-top-width: 50px; border-right-width: 50px; border-bottom-width: 50px; border-left-width: 50px; border-top-left-radius: 100px; border-top-right-radius: 100px; border-bottom-right-radius: 100px; border-bottom-left-radius: 100px; flex-shrink: 0; top: 0; left: 0; bottom: 540px; right: 0;">
-                <ui:Label text="EnvSetting" class="subtilte" style="-unity-text-align: middle-left; font-size: 100px; white-space: nowrap; -unity-font-definition: url(&quot;project://database/Assets/font/Silver.ttf?fileID=12800000&amp;guid=a56e52fe48afdd641bf405a0f934cac6&amp;type=3#Silver&quot;);"/>
-                <ui:ScrollView style="padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px;">
-                    <ui:Toggle label="Rock" name="Rock" class="Toggle" style="flex-direction: row; align-items: center; align-content: auto; align-self: stretch; -unity-font-definition: url(&quot;project://database/Assets/font/Silver.ttf?fileID=12800000&amp;guid=a56e52fe48afdd641bf405a0f934cac6&amp;type=3#Silver&quot;); font-size: 50px; justify-content: space-evenly; -unity-font-style: normal;"/>
-                    <ui:Toggle label="Grass" name="Grass" class="Toggle" style="font-size: 50px; -unity-font-definition: url(&quot;project://database/Assets/font/Silver.ttf?fileID=12800000&amp;guid=a56e52fe48afdd641bf405a0f934cac6&amp;type=3#Silver&quot;);"/>
-                    <ui:Toggle label="flower" name="flower" class="Toggle"/>
-                    <ui:Toggle label="Toggle" name="CampFire" class="Toggle"/>
-                    <ui:Toggle label="Fence" name="Fence" class="Toggle"/>
-                    <ui:Toggle label="Plant" name="Plant" class="Toggle"/>
-                    <ui:Toggle label="Woodd" name="Wood" class="Toggle"/>
+    <ui:VisualElement name="FullScreen" class="full-screen">
+        <ui:VisualElement name="ControllPanel" class="control-panel">
+            <ui:VisualElement name="EnvSetting" class="section env-setting">
+                <ui:Label text="EnvSetting" name="EnvSettingTitle" class="subtilte"/>
+                <ui:ScrollView name="ScrollView" class="toggle-list">
+                    <ui:Toggle label="Rock" name="Rock" value="true" class="Toggle"/>
+                    <ui:Toggle label="Grass" name="Grass" value="true" class="Toggle"/>
+                    <ui:Toggle label="Flower" name="flower" value="true" class="Toggle"/>
+                    <ui:Toggle label="Camp Fire" name="CampFire" value="true" class="Toggle"/>
+                    <ui:Toggle label="Fence" name="Fence" value="true" class="Toggle"/>
+                    <ui:Toggle label="Plant" name="Plant" value="true" class="Toggle"/>
+                    <ui:Toggle label="Wood" name="Wood" value="true" class="Toggle"/>
                 </ui:ScrollView>
-                <ui:Slider label="Camp Fire Size" value="42" high-value="100" style="font-size: 40px;"/>
-                <ui:Slider label="Light Intensity" value="42" high-value="100" style="font-size: 40px;"/>
+                <ui:Slider label="Fire Size" value="1" low-value="0" high-value="5" name="FireSizeSlider" class="env-slider"/>
+                <ui:Slider label="Fire Intensity" value="1" low-value="0" high-value="5" name="FireIntensitySlider" class="env-slider"/>
+                <ui:Slider label="Sun Intensity" value="0.78" low-value="0" high-value="2" name="SunIntensitySlider" class="env-slider"/>
+                <ui:Slider label="Sun Rotation" value="18.5" low-value="0" high-value="360" name="SunRotationSlider" class="env-slider"/>
             </ui:VisualElement>
-            <ui:VisualElement name="Atomosphere" style="flex-grow: 0; align-self: stretch; flex-direction: column; align-items: flex-start; justify-content: flex-start; flex-shrink: 0; position: absolute; top: 540px; right: 6px; left: 0; bottom: 0; -unity-font-definition: url(&quot;project://database/Assets/font/Silver.ttf?fileID=12800000&amp;guid=a56e52fe48afdd641bf405a0f934cac6&amp;type=3#Silver&quot;); border-top-width: 50px; border-right-width: 50px; border-bottom-width: 50px; border-left-width: 50px; border-top-left-radius: 100px; border-top-right-radius: 100px; border-bottom-right-radius: 100px; border-bottom-left-radius: 100px;">
-                <ui:Label text="Atomosphere" class="subtilte" style="font-size: 100px; -unity-text-align: middle-left;"/>
-                <ui:DropdownField label="Env Theme" style="font-size: 50px; justify-content: space-evenly; align-self: stretch;"/>
+            <ui:VisualElement name="Atomosphere" class="section atmosphere">
+                <ui:Label text="Atomosphere" name="AtmosphereTitle" class="subtilte"/>
+                <ui:DropdownField label="Env Theme" name="SkyThemeDropdown" choices="Day,Sunset,Night" class="env-dropdown"/>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="SceneArea" style="flex-grow: 1; width: 597px; background-color: rgba(0, 0, 0, 0); align-self: flex-end; flex-direction: column; height: 1077px; color: rgb(0, 0, 0);">
-            <ui:VisualElement name="ButtonPanel" style="flex-grow: 1; width: 300px; height: auto; flex-direction: column; align-items: center; justify-content: flex-start; align-self: flex-end;"/>
+        <ui:VisualElement name="SceneArea" class="scene-area">
+            <ui:VisualElement name="InfoPanel" class="info-panel">
+                <ui:Label text="Waiting for data..." name="InfoLabel" class="info-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="ButtonPanel" class="button-panel">
+                <ui:Button text="Forward" name="ForwardButton" class="cam-button"/>
+                <ui:VisualElement name="ButtonRow" class="button-row">
+                    <ui:Button text="Left" name="LeftButton" class="cam-button"/>
+                    <ui:Button text="Right" name="RightButton" class="cam-button"/>
+                </ui:VisualElement>
+                <ui:Button text="Backward" name="BackwardButton" class="cam-button"/>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
