@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,53 +7,83 @@ public class EnvUIController : MonoBehaviour
 {
     public UIDocument uiDocument;
     public EnvironmentManager envManager;
+    public EnvironmentData initialData;
     VisualElement root;
 
-    Toggle rockToggle, grassToggle, flowerToggle, campFireToggle, fenceToggle, plantToggle, woodToggle;
-    Slider fireSizeSlider, fireIntensitySlider, sunIntensitySlider, sunRotationSlider;
-    DropdownField skyThemeDropdown;
+    //Runtime copy, so experimenting never changes the initialData asset
+    private EnvironmentData currentEnvData;
+    public EnvironmentData CurrentEnvData => currentEnvData;
+
+    Button applyBtn, saveBtn, loadBtn;
+    TextField fileNameTextField;
+
+    void Awake()
+    {
+        currentEnvData = ScriptableObject.CreateInstance<EnvironmentData>();
+        if (initialData != null)
+            currentEnvData.setData(initialData);
+    }
 
     void Start()
     {
         root = uiDocument.rootVisualElement;
 
-        //Toggle -> show / hide objects
-        rockToggle = root.Q<Toggle>("Rock");
-        rockToggle.RegisterValueChangedCallback(evt => envManager.activateRocks(evt.newValue));
+        //UI <-> Data: the bindings in the UXML read and write currentEnvData
+        root.Q<VisualElement>("ControllPanel").dataSource = currentEnvData;
 
-        grassToggle = root.Q<Toggle>("Grass");
-        grassToggle.RegisterValueChangedCallback(evt => envManager.activateGrass(evt.newValue));
+        //Data -> Scene: apply whenever a value changes (from the UI, a loaded file or the weather)
+        currentEnvData.propertyChanged += (sender, evt) => envManager.applyEnvironmentData(currentEnvData);
+        envManager.applyEnvironmentData(currentEnvData);
 
-        flowerToggle = root.Q<Toggle>("flower");
-        flowerToggle.RegisterValueChangedCallback(evt => envManager.activateFlowers(evt.newValue));
+        applyBtn = root.Q<Button>("ApplyBtn");
+        applyBtn.clicked += onApplyBtnClicked;
 
-        campFireToggle = root.Q<Toggle>("CampFire");
-        campFireToggle.RegisterValueChangedCallback(evt => envManager.activateCampFire(evt.newValue));
+        saveBtn = root.Q<Button>("SaveBtn");
+        saveBtn.clicked += onSaveBtnClicked;
 
-        fenceToggle = root.Q<Toggle>("Fence");
-        fenceToggle.RegisterValueChangedCallback(evt => envManager.activateFence(evt.newValue));
+        loadBtn = root.Q<Button>("LoadBtn");
+        loadBtn.clicked += onLoadBtnClicked;
 
-        plantToggle = root.Q<Toggle>("Plant");
-        plantToggle.RegisterValueChangedCallback(evt => envManager.activatePlants(evt.newValue));
+        fileNameTextField = root.Q<TextField>("FileNameTextField");
+    }
 
-        woodToggle = root.Q<Toggle>("Wood");
-        woodToggle.RegisterValueChangedCallback(evt => envManager.activateWoods(evt.newValue));
+    public void onApplyBtnClicked()
+    {
+        envManager.applyEnvironmentData(currentEnvData);
+    }
 
-        //Slider -> change environment
-        fireSizeSlider = root.Q<Slider>("FireSizeSlider");
-        fireSizeSlider.RegisterValueChangedCallback(evt => envManager.setCampFireSize(evt.newValue));
+    string getSavePath()
+    {
+        string folder = Path.Combine(Application.persistentDataPath, "EnvironmentSaves");
+        Directory.CreateDirectory(folder);
 
-        fireIntensitySlider = root.Q<Slider>("FireIntensitySlider");
-        fireIntensitySlider.RegisterValueChangedCallback(evt => envManager.setCampFireIntensity(evt.newValue));
+        string fileName = fileNameTextField.value.Trim();
+        if (fileName.Length == 0)
+            fileName = "Environment.json";
+        if (!fileName.EndsWith(".json"))
+            fileName += ".json";
 
-        sunIntensitySlider = root.Q<Slider>("SunIntensitySlider");
-        sunIntensitySlider.RegisterValueChangedCallback(evt => envManager.setSunLightIntensity(evt.newValue));
+        return Path.Combine(folder, fileName);
+    }
 
-        sunRotationSlider = root.Q<Slider>("SunRotationSlider");
-        sunRotationSlider.RegisterValueChangedCallback(evt => envManager.setSunLightRotation(evt.newValue));
+    public void onSaveBtnClicked()
+    {
+        string path = getSavePath();
+        File.WriteAllText(path, currentEnvData.getSaveJson());
+        Debug.Log("Saved to: " + path);
+    }
 
-        //Dropdown -> change sky theme
-        skyThemeDropdown = root.Q<DropdownField>("SkyThemeDropdown");
-        skyThemeDropdown.RegisterValueChangedCallback(evt => envManager.setSkyboxTheme(evt.newValue));
+    public void onLoadBtnClicked()
+    {
+        string path = getSavePath();
+        if (!File.Exists(path))
+        {
+            Debug.LogWarning("Save file not found: " + path);
+            return;
+        }
+
+        currentEnvData.loadFromJson(File.ReadAllText(path));
+        envManager.applyEnvironmentData(currentEnvData);
+        Debug.Log("Loaded from: " + path);
     }
 }

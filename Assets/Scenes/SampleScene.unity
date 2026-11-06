@@ -30144,8 +30144,8 @@ MonoBehaviour:
   feetGameObject: {fileID: 892756146}
   characterGameObject: {fileID: 613136003}
   cam_Transform: {fileID: 330585546}
-  camPos1: {x: 0, y: 0, z: 0}
-  camPos2: {x: 0, y: 0, z: 0}
+  camPos1: {x: -0.38, y: 1.3, z: 1.75}
+  camPos2: {x: 0, y: 1, z: 2.42}
 --- !u!4 &1630888222
 Transform:
   m_ObjectHideFlags: 0

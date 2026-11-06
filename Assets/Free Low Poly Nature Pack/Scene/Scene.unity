@@ -9455,6 +9455,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnvUIController
   uiDocument: {fileID: 717507867}
   envManager: {fileID: 1535571043}
+  initialData: {fileID: 11400000, guid: f2c4add75a460f2308bc81a8f920a54e, type: 2}
 --- !u!114 &717507870
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12442,6 +12443,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1165001886}
   - component: {fileID: 1165001885}
+  - component: {fileID: 1165001887}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -12461,6 +12463,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5823d8f8b3a502438910a78f5ebc499, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
+--- !u!114 &1165001887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1165001884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0674ac346dcc3c00f4bd5e8c638a426, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeatherController
+  uiDocument: {fileID: 717507867}
+  networkManager: {fileID: 1165001885}
+  envUIController: {fileID: 717507869}
+  refreshSeconds: 600
 --- !u!4 &1165001886
 Transform:
   m_ObjectHideFlags: 0

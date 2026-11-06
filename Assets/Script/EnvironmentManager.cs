@@ -13,10 +13,11 @@ public class EnvironmentManager : MonoBehaviour
     public List<GameObject> fence = new List<GameObject>();
     public GameObject campFire_Object;
     public GameObject campFireParticle;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
-        
+        //Work on a copy so changing the theme does not modify the Sky material asset
+        if (RenderSettings.skybox != null)
+            RenderSettings.skybox = new Material(RenderSettings.skybox);
     }
 
     // Update is called once per frame
@@ -84,5 +85,20 @@ public class EnvironmentManager : MonoBehaviour
         else if(string.Compare(option, "Night") == 0){
             RenderSettings.skybox.SetFloat("_AtmosphereThickness", 0.2f);
         }
+    }
+
+    public void applyEnvironmentData(EnvironmentData data){
+        activateRocks(data.Rock);
+        activateGrass(data.Grass);
+        activateFlowers(data.Flower);
+        activateCampFire(data.CampFire);
+        activateFence(data.Fence);
+        activatePlants(data.Plant);
+        activateWoods(data.Wood);
+        setCampFireSize(data.FireSize);
+        setCampFireIntensity(data.FireIntensity);
+        setSunLightIntensity(data.SunIntensity);
+        setSunLightRotation(data.SunRotation);
+        setSkyboxTheme(data.SkyTheme);
     }
 }

@@ -41,10 +41,14 @@ public class UIController : MonoBehaviour
 
     [Header("Scene Object Reference")]
     public Transform cam_Transform;
+    //camPos1: face panel (close-up), camPos2: armor panel (full body)
     public Vector3 camPos1, camPos2;
+    public float camMoveSpeed = 4f;
+    Vector3 camTargetPos;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        camTargetPos = cam_Transform.position;
         setupDropDownOptions();
         activateFirstItem();
         enableFacePanel();
@@ -54,18 +58,24 @@ public class UIController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        //Move the camera smoothly instead of jumping to the target
+        cam_Transform.position = Vector3.Lerp(cam_Transform.position, camTargetPos, Time.deltaTime * camMoveSpeed);
     }
 
     void enableFacePanel()
     {
         facePanel.SetActive(true);
         armorPanel.SetActive(false);
+        //Hide the helmet so the face can be seen
+        headGameObject.SetActive(false);
+        camTargetPos = camPos1;
     }
     void enableArmorPanel()
     {
         facePanel.SetActive(false);
         armorPanel.SetActive(true);
+        headGameObject.SetActive(true);
+        camTargetPos = camPos2;
     }
 
     public void switchPanel()
@@ -218,9 +228,21 @@ public class UIController : MonoBehaviour
         dropDown.RefreshShownValue();
     }
 
+    //Every dropdown starts at 0, so this shows the first item of each part
     private void activateFirstItem()
     {
-        
+        onHairItemChanged();
+        onFaceHairItemChanged();
+        onEyesItemChanged();
+        onEyebrowItemChanged();
+        onNoseItemChanged();
+        onEarItemChanged();
+        onHeadItemChanged();
+        onChestItemChanged();
+        onArmItemChanged();
+        onBeltItemChanged();
+        onLegItemChanged();
+        onFeetItemChanged();
     }
     private void activateItem(GameObject item, int index)
     {

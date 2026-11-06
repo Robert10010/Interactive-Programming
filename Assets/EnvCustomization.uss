@@ -75,7 +75,7 @@
 }
 
 .info-panel {
-    min-width: 360px;
+    width: 520px;
     padding: 20px 30px;
     background-color: rgba(255, 255, 255, 0.69);
     border-top-left-radius: 30px;
@@ -84,9 +84,40 @@
     border-bottom-left-radius: 30px;
 }
 
+.info-title {
+    font-size: 48px;
+    margin-bottom: 6px;
+}
+
 .info-label {
-    font-size: 36px;
+    font-size: 32px;
     white-space: normal;
+}
+
+.info-status {
+    font-size: 26px;
+    color: rgb(60, 60, 60);
+    margin-top: 6px;
+}
+
+.info-field {
+    font-size: 30px;
+}
+
+.info-field .unity-base-field__label {
+    min-width: 200px;
+}
+
+.file-row {
+    margin-top: 10px;
+    justify-content: space-between;
+}
+
+.file-button {
+    flex-grow: 1;
+    height: 60px;
+    margin: 4px;
+    font-size: 32px;
 }
 
 .button-panel {

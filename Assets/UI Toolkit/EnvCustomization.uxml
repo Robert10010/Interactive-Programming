@@ -5,27 +5,91 @@
             <ui:VisualElement name="EnvSetting" class="section env-setting">
                 <ui:Label text="EnvSetting" name="EnvSettingTitle" class="subtilte"/>
                 <ui:ScrollView name="ScrollView" class="toggle-list">
-                    <ui:Toggle label="Rock" name="Rock" value="true" class="Toggle"/>
-                    <ui:Toggle label="Grass" name="Grass" value="true" class="Toggle"/>
-                    <ui:Toggle label="Flower" name="flower" value="true" class="Toggle"/>
-                    <ui:Toggle label="Camp Fire" name="CampFire" value="true" class="Toggle"/>
-                    <ui:Toggle label="Fence" name="Fence" value="true" class="Toggle"/>
-                    <ui:Toggle label="Plant" name="Plant" value="true" class="Toggle"/>
-                    <ui:Toggle label="Wood" name="Wood" value="true" class="Toggle"/>
+                    <ui:Toggle label="Rock" name="Rock" value="true" class="Toggle">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="Rock" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Toggle>
+                    <ui:Toggle label="Grass" name="Grass" value="true" class="Toggle">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="Grass" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Toggle>
+                    <ui:Toggle label="Flower" name="flower" value="true" class="Toggle">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="Flower" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Toggle>
+                    <ui:Toggle label="Camp Fire" name="CampFire" value="true" class="Toggle">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="CampFire" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Toggle>
+                    <ui:Toggle label="Fence" name="Fence" value="true" class="Toggle">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="Fence" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Toggle>
+                    <ui:Toggle label="Plant" name="Plant" value="true" class="Toggle">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="Plant" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Toggle>
+                    <ui:Toggle label="Wood" name="Wood" value="true" class="Toggle">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="Wood" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Toggle>
                 </ui:ScrollView>
-                <ui:Slider label="Fire Size" value="1" low-value="0" high-value="5" name="FireSizeSlider" class="env-slider"/>
-                <ui:Slider label="Fire Intensity" value="1" low-value="0" high-value="5" name="FireIntensitySlider" class="env-slider"/>
-                <ui:Slider label="Sun Intensity" value="0.78" low-value="0" high-value="2" name="SunIntensitySlider" class="env-slider"/>
-                <ui:Slider label="Sun Rotation" value="18.5" low-value="0" high-value="360" name="SunRotationSlider" class="env-slider"/>
+                <ui:Slider label="Fire Size" value="1" low-value="0" high-value="5" name="FireSizeSlider" class="env-slider">
+                    <Bindings>
+                        <ui:DataBinding property="value" data-source-path="FireSize" binding-mode="TwoWay"/>
+                    </Bindings>
+                </ui:Slider>
+                <ui:Slider label="Fire Intensity" value="1" low-value="0" high-value="5" name="FireIntensitySlider" class="env-slider">
+                    <Bindings>
+                        <ui:DataBinding property="value" data-source-path="FireIntensity" binding-mode="TwoWay"/>
+                    </Bindings>
+                </ui:Slider>
+                <ui:Slider label="Sun Intensity" value="0.78" low-value="0" high-value="2" name="SunIntensitySlider" class="env-slider">
+                    <Bindings>
+                        <ui:DataBinding property="value" data-source-path="SunIntensity" binding-mode="TwoWay"/>
+                    </Bindings>
+                </ui:Slider>
+                <ui:Slider label="Sun Rotation" value="18.5" low-value="0" high-value="360" name="SunRotationSlider" class="env-slider">
+                    <Bindings>
+                        <ui:DataBinding property="value" data-source-path="SunRotation" binding-mode="TwoWay"/>
+                    </Bindings>
+                </ui:Slider>
             </ui:VisualElement>
             <ui:VisualElement name="Atomosphere" class="section atmosphere">
                 <ui:Label text="Atomosphere" name="AtmosphereTitle" class="subtilte"/>
-                <ui:DropdownField label="Env Theme" name="SkyThemeDropdown" choices="Day,Sunset,Night" class="env-dropdown"/>
+                <ui:DropdownField label="Env Theme" name="SkyThemeDropdown" choices="Day,Sunset,Night" class="env-dropdown">
+                    <Bindings>
+                        <ui:DataBinding property="value" data-source-path="SkyTheme" binding-mode="TwoWay"/>
+                    </Bindings>
+                </ui:DropdownField>
+                <ui:TextField label="File" value="Environment.json" name="FileNameTextField" class="env-dropdown"/>
+                <ui:VisualElement name="FileButtonRow" class="button-row file-row">
+                    <ui:Button text="Save" name="SaveBtn" class="file-button"/>
+                    <ui:Button text="Load" name="LoadBtn" class="file-button"/>
+                    <ui:Button text="Apply" name="ApplyBtn" class="file-button"/>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="SceneArea" class="scene-area">
             <ui:VisualElement name="InfoPanel" class="info-panel">
-                <ui:Label text="Waiting for data..." name="InfoLabel" class="info-label"/>
+                <ui:Label text="Real-world Weather" name="InfoTitle" class="info-title"/>
+                <ui:DropdownField label="Location" name="LocationDropdown" choices="Taipei,Tokyo,Reykjavik,Wellington" index="0" class="info-field"/>
+                <ui:Label text="Weather: -" name="WeatherLabel" class="info-label"/>
+                <ui:Label text="Temperature: -" name="TemperatureLabel" class="info-label"/>
+                <ui:Label text="Cloud: -" name="CloudLabel" class="info-label"/>
+                <ui:Label text="Wind: -" name="WindLabel" class="info-label"/>
+                <ui:Label text="Sun: -" name="SunLabel" class="info-label"/>
+                <ui:Label text="Waiting for data..." name="InfoLabel" class="info-label info-status"/>
+                <ui:Toggle label="Weather drives scene" name="UseWeatherToggle" value="true" class="info-field"/>
+                <ui:Toggle label="Auto refresh (10 min)" name="AutoRefreshToggle" value="true" class="info-field"/>
+                <ui:Button text="Refresh" name="RefreshButton" class="file-button"/>
             </ui:VisualElement>
             <ui:VisualElement name="ButtonPanel" class="button-panel">
                 <ui:Button text="Forward" name="ForwardButton" class="cam-button"/>
