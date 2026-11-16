@@ -1,0 +1,52 @@
+/* Extra styles for the Pokémon scene, used together with EnvCustomization.uss */
+
+.pokemon-panel {
+    width: 560px;
+}
+
+.search-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.search-field {
+    flex-grow: 1;
+    font-size: 30px;
+    margin: 4px 0;
+}
+
+.search-button {
+    width: 120px;
+    height: 56px;
+    margin: 4px;
+    font-size: 30px;
+}
+
+.pokemon-row {
+    flex-direction: row;
+    margin-top: 8px;
+}
+
+.sprite-image {
+    width: 160px;
+    height: 160px;
+    margin-right: 14px;
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.5);
+    -unity-background-scale-mode: scale-to-fit;
+    border-top-left-radius: 80px;
+    border-top-right-radius: 80px;
+    border-bottom-right-radius: 80px;
+    border-bottom-left-radius: 80px;
+}
+
+.pokemon-info {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.pokemon-name {
+    font-size: 40px;
+    -unity-font-style: bold;
+    white-space: normal;
+}

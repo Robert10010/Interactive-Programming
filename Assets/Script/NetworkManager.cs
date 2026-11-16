@@ -23,4 +23,23 @@ public class NetworkManager : MonoBehaviour
             }
         }
     }
+
+    //Download an image (e.g. a Pokémon sprite) as a Texture2D
+    public IEnumerator SendTextureRequest(string url, Action<Texture2D> onSuccess, Action<string> onError)
+    {
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                onSuccess?.Invoke(DownloadHandlerTexture.GetContent(request));
+            }
+            else
+            {
+                Debug.LogError(request.error);
+                onError?.Invoke(request.error);
+            }
+        }
+    }
 }
