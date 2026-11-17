@@ -61,6 +61,11 @@ public class PokemonController : MonoBehaviour
 
     void Awake()
     {
+        //Without the EnvironmentManager every update stops before the images and prices load,
+        //so find it if the Inspector reference was not set
+        if (envManager == null)
+            envManager = FindFirstObjectByType<EnvironmentManager>();
+
         //Runtime copy, so the scene never changes the initialData asset
         env = ScriptableObject.CreateInstance<EnvironmentData>();
         if (initialData != null)

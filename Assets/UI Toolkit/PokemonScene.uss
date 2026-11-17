@@ -1,8 +1,8 @@
 /* Extra styles for the Pokémon scene, used together with EnvCustomization.uss */
 
-/* Only one panel, on the right; the rest of the screen shows the scene */
+/* Only one panel, on the left; the rest of the screen shows the scene */
 .pokemon-screen {
-    justify-content: flex-end;
+    justify-content: flex-start;
     padding: 30px;
 }
 

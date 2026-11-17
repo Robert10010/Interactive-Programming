@@ -9394,8 +9394,6 @@ GameObject:
   m_Component:
   - component: {fileID: 717507868}
   - component: {fileID: 717507867}
-  - component: {fileID: 717507869}
-  - component: {fileID: 717507870}
   m_Layer: 5
   m_Name: UIDocument
   m_TagString: Untagged
@@ -9441,35 +9439,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &717507869
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 717507866}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76cbb6a0aee74d34d82e687650114c6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnvUIController
-  uiDocument: {fileID: 717507867}
-  envManager: {fileID: 1535571043}
-  initialData: {fileID: 11400000, guid: f2c4add75a460f2308bc81a8f920a54e, type: 2}
---- !u!114 &717507870
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 717507866}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94c01fa18ce64e74fa3b934835efeb51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraUIController
-  uiDocument: {fileID: 717507867}
-  cameraController: {fileID: 1500945956}
 --- !u!1001 &728016130
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17160,7 +17129,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PokemonController
   uiDocument: {fileID: 717507867}
   networkManager: {fileID: 1165001885}
-  envUIController: {fileID: 717507869}
+  envManager: {fileID: 1535571043}
+  initialData: {fileID: 11400000, guid: f2c4add75a460f2308bc81a8f920a54e, type: 2}
   character: {fileID: 1937254319}
   characterAnimator: {fileID: 1937254318}
   typeLight: {fileID: 1801778779}
