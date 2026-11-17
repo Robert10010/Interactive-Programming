@@ -17134,12 +17134,14 @@ MonoBehaviour:
   character: {fileID: 1937254319}
   characterAnimator: {fileID: 1937254318}
   typeLight: {fileID: 1801778779}
+  rain: {fileID: 0}
   defaultPokemon: pikachu
   minScale: 0.6
   maxScale: 1.8
-  minAnimSpeed: 0.5
-  maxAnimSpeed: 2.2
   scaleLerpSpeed: 3
+  cheapPrice: 1
+  expensivePrice: 50
+  maxRainRate: 2000
 --- !u!4 &1736713049
 Transform:
   m_ObjectHideFlags: 0
@@ -18663,15 +18665,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1126242358742066004, guid: 094cd1418e634464ebab9c4a1fdcbde4, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.6734599
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1126242358742066004, guid: 094cd1418e634464ebab9c4a1fdcbde4, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1.6734599
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1126242358742066004, guid: 094cd1418e634464ebab9c4a1fdcbde4, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.6734599
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1126242358742066004, guid: 094cd1418e634464ebab9c4a1fdcbde4, type: 3}
       propertyPath: m_LocalPosition.x
