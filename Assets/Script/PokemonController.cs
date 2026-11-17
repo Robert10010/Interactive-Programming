@@ -1,43 +1,71 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UIRandom = UnityEngine.Random;
 using UnityEngine.UIElements;
+using Random = UnityEngine.Random;
 
-//Looks up a Pokémon with PokeAPI, shows it in the UI and lets its data change the scene:
-//  height      -> character size
-//  speed stat  -> dance speed (Animator.speed)
-//  type        -> environment theme (fire / water / grass ...) and light colour
-//  weight      -> camp fire intensity
+//Uses two Web APIs to change the scene:
+//  PokeAPI -> Pokémon stats and sprite
+//     height      -> character size
+//     speed stat  -> dance speed
+//     type        -> light colour, camp fire size
+//     weight      -> camp fire intensity
+//  TCGdex  -> trading card image and market price
+//     price       -> mood: cheap = sunny and happy, expensive = rain and sad
 public class PokemonController : MonoBehaviour
 {
     const string PokemonUrl = "https://pokeapi.co/api/v2/pokemon/";
+    const string CardSearchUrl = "https://api.tcgdex.net/v2/en/cards?name=";
+    const string CardUrl = "https://api.tcgdex.net/v2/en/cards/";
     const int MaxPokemonId = 1025;
+    const int MaxCards = 30;
 
     public UIDocument uiDocument;
     public NetworkManager networkManager;
-    public EnvUIController envUIController;
+    public EnvironmentManager envManager;
+    public EnvironmentData initialData;
 
     [Header("Scene objects the data changes")]
     public Transform character;
     public Animator characterAnimator;
     public Light typeLight;
+    public ParticleSystem rain;
 
     [Header("Tuning")]
     public string defaultPokemon = "pikachu";
     public float minScale = 0.6f, maxScale = 1.8f;      //multiplier of the character's original size
-    public float minAnimSpeed = 0.5f, maxAnimSpeed = 2.2f;
     public float scaleLerpSpeed = 3f;
+    [Tooltip("At or below this price the scene is fully happy")]
+    public float cheapPrice = 1f;
+    [Tooltip("At or above this price the scene is fully sad and raining")]
+    public float expensivePrice = 50f;
+    public float maxRainRate = 2000f;
 
     TextField searchField;
     Button searchButton, randomButton;
-    VisualElement spriteImage;
-    Label nameLabel, typeLabel, heightLabel, weightLabel, speedLabel, infoLabel;
+    VisualElement spriteImage, cardImage;
+    Label nameLabel, typeLabel, heightLabel, weightLabel, speedLabel;
+    Label cardNameLabel, rarityLabel, priceLabel, moodLabel, infoLabel;
+    DropdownField cardDropdown;
     Toggle usePokemonToggle;
 
+    EnvironmentData env;
     PokemonData currentPokemon;
+    TcgCardBrief[] cards = new TcgCardBrief[0];
+    float mood = 0.5f;          //0 = happy (cheap), 1 = sad (expensive)
+    bool hasPrice;
+    float statDanceSpeed = 1f;
     Vector3 baseScale, targetScale;
-    int requestVersion;     //ignores an older request if the user searches again quickly
+    int pokemonVersion, cardVersion;    //ignore older requests when the user searches again quickly
+
+    void Awake()
+    {
+        //Runtime copy, so the scene never changes the initialData asset
+        env = ScriptableObject.CreateInstance<EnvironmentData>();
+        if (initialData != null)
+            env.setData(initialData);
+    }
 
     void Start()
     {
@@ -52,11 +80,19 @@ public class PokemonController : MonoBehaviour
         heightLabel = root.Q<Label>("HeightLabel");
         weightLabel = root.Q<Label>("WeightLabel");
         speedLabel = root.Q<Label>("SpeedLabel");
+        cardDropdown = root.Q<DropdownField>("CardDropdown");
+        cardImage = root.Q<VisualElement>("CardImage");
+        cardNameLabel = root.Q<Label>("CardNameLabel");
+        rarityLabel = root.Q<Label>("RarityLabel");
+        priceLabel = root.Q<Label>("PriceLabel");
+        moodLabel = root.Q<Label>("MoodLabel");
         infoLabel = root.Q<Label>("InfoLabel");
         usePokemonToggle = root.Q<Toggle>("UsePokemonToggle");
 
         if (character != null)
             baseScale = targetScale = character.localScale;
+        if (rain != null)
+            setRain(0f);
 
         searchField.SetValueWithoutNotify(defaultPokemon);
         searchButton.clicked += search;
@@ -66,14 +102,15 @@ public class PokemonController : MonoBehaviour
             if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
                 search();
         });
-        usePokemonToggle.RegisterValueChangedCallback(evt =>
+        cardDropdown.RegisterValueChangedCallback(evt =>
         {
-            if (evt.newValue && currentPokemon != null)
-                applyPokemon(currentPokemon);
-            else if (!evt.newValue)
-                resetCharacter();
+            int index = cardDropdown.index;
+            if (index >= 0 && index < cards.Length)
+                StartCoroutine(loadCard(cards[index].id));
         });
+        usePokemonToggle.RegisterValueChangedCallback(evt => applyAll());
 
+        envManager.applyEnvironmentData(env);
         search();
     }
 
@@ -83,6 +120,8 @@ public class PokemonController : MonoBehaviour
         if (character != null)
             character.localScale = Vector3.Lerp(character.localScale, targetScale, Time.deltaTime * scaleLerpSpeed);
     }
+
+    // ---------- Search ----------
 
     public void search()
     {
@@ -98,22 +137,23 @@ public class PokemonController : MonoBehaviour
 
     public void searchRandom()
     {
-        string id = UIRandom.Range(1, MaxPokemonId + 1).ToString();
+        string id = Random.Range(1, MaxPokemonId + 1).ToString();
         searchField.SetValueWithoutNotify(id);
         StartCoroutine(requestPokemon(id));
     }
 
     IEnumerator requestPokemon(string query)
     {
-        int version = ++requestVersion;
+        int version = ++pokemonVersion;
         infoLabel.text = "Searching \"" + query + "\"...";
 
+        //1. PokeAPI: stats
         PokemonData data = null;
         string error = null;
         yield return networkManager.SendRequest(PokemonUrl + Uri.EscapeDataString(query),
             json => data = JsonUtility.FromJson<PokemonData>(json),
             e => error = e);
-        if (version != requestVersion) yield break;
+        if (version != pokemonVersion) yield break;
 
         if (data == null || data.id == 0)
         {
@@ -125,12 +165,10 @@ public class PokemonController : MonoBehaviour
 
         currentPokemon = data;
         showPokemon(data);
-        if (usePokemonToggle.value)
-            applyPokemon(data);
+        applyAll();
 
-        //Sprite image
+        //2. Sprite
         if (data.sprites != null && !string.IsNullOrEmpty(data.sprites.front_default))
-        {
             yield return networkManager.SendTextureRequest(data.sprites.front_default,
                 tex =>
                 {
@@ -138,15 +176,106 @@ public class PokemonController : MonoBehaviour
                     spriteImage.style.backgroundImage = new StyleBackground(tex);
                 },
                 e => Debug.LogWarning("Sprite error: " + e));
+        if (version != pokemonVersion) yield break;
+
+        //3. TCGdex: trading cards of this Pokémon
+        yield return requestCards(data.name.Replace('-', ' '));
+    }
+
+    IEnumerator requestCards(string pokemonName)
+    {
+        int version = pokemonVersion;
+        infoLabel.text = "Looking for " + pokemonName + " cards...";
+
+        TcgCardList list = null;
+        string error = null;
+        yield return networkManager.SendRequest(CardSearchUrl + Uri.EscapeDataString(pokemonName),
+            json => list = JsonUtility.FromJson<TcgCardList>("{\"cards\":" + json + "}"),
+            e => error = e);
+        if (version != pokemonVersion) yield break;
+
+        //Only cards with an image (the end of the list is mostly expensive promo cards, so keep the API order)
+        List<TcgCardBrief> found = new List<TcgCardBrief>();
+        if (list != null && list.cards != null)
+            foreach (TcgCardBrief c in list.cards)
+                if (found.Count < MaxCards && !string.IsNullOrEmpty(c.image))
+                    found.Add(c);
+
+        cards = found.ToArray();
+        if (cards.Length == 0)
+        {
+            clearCard(error != null ? "Card API error: " + error : "No cards found for " + pokemonName + ".");
+            yield break;
+        }
+
+        List<string> names = new List<string>();
+        foreach (TcgCardBrief c in cards)
+            names.Add(c.name + " (" + c.id + ")");
+        cardDropdown.choices = names;
+        cardDropdown.SetValueWithoutNotify(names[0]);
+
+        yield return loadCard(cards[0].id);
+    }
+
+    IEnumerator loadCard(string cardId)
+    {
+        int version = ++cardVersion;
+        infoLabel.text = "Loading card " + cardId + "...";
+
+        TcgCard card = null;
+        string error = null;
+        yield return networkManager.SendRequest(CardUrl + Uri.EscapeDataString(cardId),
+            json => card = JsonUtility.FromJson<TcgCard>(json),
+            e => error = e);
+        if (version != cardVersion) yield break;
+
+        if (card == null || string.IsNullOrEmpty(card.id))
+        {
+            clearCard("Card API error: " + error);
+            yield break;
+        }
+
+        //Price -> mood
+        cardNameLabel.text = card.name + (card.set != null && !string.IsNullOrEmpty(card.set.name) ? " - " + card.set.name : "");
+        rarityLabel.text = "Rarity: " + (string.IsNullOrEmpty(card.rarity) ? "-" : card.rarity);
+        hasPrice = card.tryGetPrice(out float price, out string unit);
+        if (hasPrice)
+        {
+            priceLabel.text = "Market price: " + price.ToString("0.00") + " " + unit;
+            mood = Mathf.InverseLerp(Mathf.Log(cheapPrice), Mathf.Log(expensivePrice), Mathf.Log(Mathf.Max(price, 0.01f)));
         }
         else
         {
-            spriteImage.style.backgroundImage = StyleKeyword.None;
+            priceLabel.text = "Market price: no data";
+            mood = 0.5f;
         }
+        applyAll();
 
-        if (version == requestVersion)
+        //Card image
+        if (!string.IsNullOrEmpty(card.image))
+            yield return networkManager.SendTextureRequest(card.image + "/high.png",
+                tex => cardImage.style.backgroundImage = new StyleBackground(tex),
+                e => Debug.LogWarning("Card image error: " + e));
+
+        if (version == cardVersion)
             infoLabel.text = "Updated " + DateTime.Now.ToString("HH:mm:ss");
     }
+
+    void clearCard(string message)
+    {
+        cardDropdown.choices = new List<string>();
+        cardDropdown.SetValueWithoutNotify("");
+        cardImage.style.backgroundImage = StyleKeyword.None;
+        cardNameLabel.text = "-";
+        rarityLabel.text = "Rarity: -";
+        priceLabel.text = "Market price: -";
+        hasPrice = false;
+        mood = 0.5f;
+        applyAll();
+        infoLabel.text = message;
+    }
+
+    // ---------- UI ----------
 
     void showPokemon(PokemonData p)
     {
@@ -163,77 +292,88 @@ public class PokemonController : MonoBehaviour
         speedLabel.text = "Speed: " + p.getStat("speed");
     }
 
-    //Data mapping: what the Pokémon means for our scene
+    // ---------- Data -> scene ----------
+
+    void applyAll()
+    {
+        if (!usePokemonToggle.value)
+        {
+            //Back to the original scene
+            env.setData(initialData != null ? initialData : ScriptableObject.CreateInstance<EnvironmentData>());
+            targetScale = baseScale;
+            statDanceSpeed = 1f;
+            setRain(0f);
+            if (characterAnimator != null)
+                characterAnimator.speed = 1f;
+            moodLabel.text = "";
+            envManager.applyEnvironmentData(env);
+            return;
+        }
+
+        if (currentPokemon != null)
+            applyPokemon(currentPokemon);
+        applyMood();
+        envManager.applyEnvironmentData(env);
+    }
+
     void applyPokemon(PokemonData p)
     {
         //Height -> character size (0.2 m Pokémon is small, 3 m+ is big)
-        float heightT = Mathf.InverseLerp(2f, 30f, p.height);
-        targetScale = baseScale * Mathf.Lerp(minScale, maxScale, heightT);
+        targetScale = baseScale * Mathf.Lerp(minScale, maxScale, Mathf.InverseLerp(2f, 30f, p.height));
 
         //Speed stat -> dance speed
-        if (characterAnimator != null)
-            characterAnimator.speed = Mathf.Lerp(minAnimSpeed, maxAnimSpeed, Mathf.InverseLerp(20f, 150f, p.getStat("speed")));
+        statDanceSpeed = Mathf.Lerp(0.6f, 1.6f, Mathf.InverseLerp(20f, 150f, p.getStat("speed")));
 
-        //Weight -> camp fire intensity (heavier, stronger fire)
-        EnvironmentData env = envUIController.CurrentEnvData;
+        //Weight -> camp fire intensity, fire type -> bigger fire
         env.FireIntensity = Mathf.Lerp(0.5f, 5f, Mathf.InverseLerp(10f, 2000f, p.weight));
+        env.FireSize = p.primaryType == "fire" || p.primaryType == "dragon" ? 4f : 1.5f;
 
-        //Type -> environment theme
-        applyType(p.primaryType, env);
+        //Type -> light colour
         if (typeLight != null)
             typeLight.color = typeColor(p.primaryType);
     }
 
-    void applyType(string type, EnvironmentData env)
+    //Card price -> how the whole scene feels
+    void applyMood()
     {
-        //Start from a normal day, then each type changes what it cares about
-        env.SkyTheme = "Day";
-        env.SunIntensity = 1f;
-        env.CampFire = true;
-        env.FireSize = 1.5f;
-        env.Rock = env.Grass = env.Flower = env.Plant = env.Wood = env.Fence = true;
+        float sad = mood;
 
-        switch (type)
-        {
-            case "fire":
-            case "dragon":
-                env.SkyTheme = "Sunset";
-                env.FireSize = 4f;
-                break;
-            case "water":
-            case "ice":
-                env.CampFire = false;   //water puts the fire out
-                env.SunIntensity = 0.6f;
-                break;
-            case "grass":
-            case "bug":
-            case "fairy":
-                env.FireSize = 0.8f;
-                env.SunIntensity = 1.4f;
-                break;
-            case "rock":
-            case "ground":
-            case "steel":
-                env.Flower = env.Plant = env.Grass = false;   //bare, rocky land
-                break;
-            case "ghost":
-            case "dark":
-            case "psychic":
-            case "poison":
-                env.SkyTheme = "Night";
-                env.SunIntensity = 0.15f;
-                break;
-            case "electric":
-                env.SunIntensity = 1.8f;
-                break;
-        }
+        //Sky and light: cheap is a bright sunny day, expensive is a dark, gloomy night
+        env.SkyTheme = sad < 0.35f ? "Day" : sad < 0.7f ? "Sunset" : "Night";
+        env.SunIntensity = Mathf.Lerp(1.6f, 0.15f, sad);
+
+        //Happy: flowers bloom. Sad: flowers are gone
+        env.Flower = sad < 0.5f;
+        env.Plant = sad < 0.8f;
+        env.Grass = true;
+
+        //Rain starts in the expensive half and puts the camp fire out when it is heavy
+        float rainAmount = Mathf.InverseLerp(0.5f, 1f, sad);
+        setRain(rainAmount);
+        env.CampFire = rainAmount < 0.6f;
+
+        //Happy: fast, bouncy dance. Sad: slow, tired dance
+        if (characterAnimator != null)
+            characterAnimator.speed = statDanceSpeed * Mathf.Lerp(1.5f, 0.3f, sad);
+
+        moodLabel.text = !hasPrice ? "Mood: -"
+            : sad < 0.25f ? "So cheap! Everyone is happy!"
+            : sad < 0.5f ? "Not bad, a nice day."
+            : sad < 0.8f ? "Pricey... it starts to rain."
+            : "Way too expensive... so sad.";
     }
 
-    void resetCharacter()
+    void setRain(float amount)
     {
-        targetScale = baseScale;
-        if (characterAnimator != null)
-            characterAnimator.speed = 1f;
+        if (rain == null)
+            return;
+
+        ParticleSystem.EmissionModule emission = rain.emission;
+        emission.rateOverTime = amount * maxRainRate;
+        if (amount > 0f && !rain.isPlaying)
+            rain.Play();
+        else if (amount <= 0f && rain.isPlaying)
+            rain.Stop(true, ParticleSystemStopBehavior.StopEmitting);
     }
 
     static Color typeColor(string type)

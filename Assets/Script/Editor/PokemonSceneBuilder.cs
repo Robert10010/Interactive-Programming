@@ -1,22 +1,25 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-//Builds Assets/Scenes/PokemonScene.unity from the nature Scene.unity:
-//copies the scene, swaps the UI to PokemonScene.uxml, replaces the weather API with PokeAPI
-//and adds the dancing GanzSe character next to the camp fire.
+//Builds or updates Assets/Scenes/PokemonScene.unity.
+//  New scene: copied from the nature Scene.unity, the dancing GanzSe character is added next to the camp fire.
+//  Existing scene: only the UI, controllers and rain are updated, so a hand-placed character keeps its position.
 public static class PokemonSceneBuilder
 {
-    const string MenuPath = "Tools/建立寶可夢場景（PokeAPI）";
+    const string MenuPath = "Tools/建立或更新寶可夢場景（PokeAPI + 卡片時價）";
     const string SourceScene = "Assets/Free Low Poly Nature Pack/Scene/Scene.unity";
     const string TargetScene = "Assets/Scenes/PokemonScene.unity";
     const string UxmlPath = "Assets/UI Toolkit/PokemonScene.uxml";
     const string CharacterPrefab = "Assets/URP GanzSe Free Modular Character Pack/Prefabs/Modular Character/GanzSe Free Modular Character Update 1_1.prefab";
     const string AnimatorPath = "Assets/URP GanzSe Free Modular Character Pack/Animation/Character.controller";
+    const string RainMaterialPath = "Assets/Materials/RainDrop.mat";
+    const string CharacterName = "Trainer";
 
     [MenuItem(MenuPath)]
     public static void Build()
@@ -24,12 +27,8 @@ public static class PokemonSceneBuilder
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
             return;
 
-        if (AssetDatabase.LoadAssetAtPath<SceneAsset>(TargetScene) != null &&
-            !EditorUtility.DisplayDialog("Pokemon Scene", TargetScene + " 已存在，要重新建立嗎？（會覆蓋）", "重新建立", "取消"))
-            return;
-
-        AssetDatabase.DeleteAsset(TargetScene);
-        if (!AssetDatabase.CopyAsset(SourceScene, TargetScene))
+        bool isNew = AssetDatabase.LoadAssetAtPath<SceneAsset>(TargetScene) == null;
+        if (isNew && !AssetDatabase.CopyAsset(SourceScene, TargetScene))
         {
             Debug.LogError("無法複製場景：" + SourceScene);
             return;
@@ -37,50 +36,142 @@ public static class PokemonSceneBuilder
 
         var scene = EditorSceneManager.OpenScene(TargetScene, OpenSceneMode.Single);
 
-        //1. Remove the weather API so it does not fight with PokeAPI over EnvironmentData
+        EnvironmentManager envManager = Object.FindFirstObjectByType<EnvironmentManager>();
+        NetworkManager networkManager = Object.FindFirstObjectByType<NetworkManager>();
+        UIDocument uiDocument = Object.FindFirstObjectByType<UIDocument>();
+        Camera cam = Camera.main;
+
+        //1. Keep the initial environment, then remove the scripts this scene does not use:
+        //   weather API, the left environment panel and the camera move buttons
+        PokemonController pokemon = Object.FindFirstObjectByType<PokemonController>();
+        EnvironmentData initialData = pokemon != null ? pokemon.initialData : null;
+        foreach (EnvUIController e in Object.FindObjectsByType<EnvUIController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (initialData == null) initialData = e.initialData;
+            Object.DestroyImmediate(e);
+        }
         foreach (WeatherController w in Object.FindObjectsByType<WeatherController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             Object.DestroyImmediate(w);
+        foreach (CameraUIController c in Object.FindObjectsByType<CameraUIController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            Object.DestroyImmediate(c);
 
-        //2. Swap the UI
-        UIDocument uiDocument = Object.FindFirstObjectByType<UIDocument>();
+        //2. UI
         uiDocument.visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UxmlPath);
 
-        NetworkManager networkManager = Object.FindFirstObjectByType<NetworkManager>();
-        EnvUIController envUI = Object.FindFirstObjectByType<EnvUIController>();
-        EnvironmentManager envManager = Object.FindFirstObjectByType<EnvironmentManager>();
-
-        //3. Character next to the camp fire, facing the camera
-        GameObject character = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(CharacterPrefab), scene);
-        character.name = "Trainer";
-        pickOutfit(character);
-        placeCharacter(character, envManager, Camera.main);
-
+        //3. Character (only created once)
+        GameObject character = GameObject.Find(CharacterName);
+        if (character == null)
+        {
+            character = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(CharacterPrefab), scene);
+            character.name = CharacterName;
+            pickOutfit(character);
+            placeCharacter(character, envManager, cam);
+        }
         Animator animator = character.GetComponentInChildren<Animator>();
         if (animator == null)
             animator = character.AddComponent<Animator>();
-        animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(AnimatorPath);
+        if (animator.runtimeAnimatorController == null)
+            animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(AnimatorPath);
         animator.applyRootMotion = false;
 
-        //4. Controller
-        Light pointLight = Object.FindObjectsByType<Light>(FindObjectsSortMode.None).FirstOrDefault(l => l.type == LightType.Point);
+        //4. Rain (only created once)
+        GameObject rainObject = GameObject.Find("Rain");
+        ParticleSystem rain = rainObject != null ? rainObject.GetComponent<ParticleSystem>() : createRain(cam, envManager);
 
-        GameObject go = new GameObject("PokemonController");
-        PokemonController pokemon = go.AddComponent<PokemonController>();
+        //5. Controller
+        if (pokemon == null)
+            pokemon = new GameObject("PokemonController").AddComponent<PokemonController>();
         pokemon.uiDocument = uiDocument;
         pokemon.networkManager = networkManager;
-        pokemon.envUIController = envUI;
+        pokemon.envManager = envManager;
+        pokemon.initialData = initialData;
         pokemon.character = character.transform;
         pokemon.characterAnimator = animator;
-        pokemon.typeLight = pointLight;
+        pokemon.rain = rain;
+        if (pokemon.typeLight == null)
+            pokemon.typeLight = Object.FindObjectsByType<Light>(FindObjectsSortMode.None).FirstOrDefault(l => l.type == LightType.Point);
+        EditorUtility.SetDirty(pokemon);
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         addToBuildSettings();
 
-        Selection.activeGameObject = character;
-        Debug.Log("寶可夢場景已建立：" + TargetScene +
-                  (pointLight == null ? "（找不到 Point Light，屬性燈光顏色不會變）" : "") +
-                  "\n角色位置 / 大小可以在 Trainer 物件上微調。");
+        Selection.activeGameObject = pokemon.gameObject;
+        Debug.Log((isNew ? "寶可夢場景已建立：" : "寶可夢場景已更新：") + TargetScene +
+                  (initialData == null ? "\n（沒有找到 EnvironmentData，可在 PokemonController 的 Initial Data 指定）" : "") +
+                  "\n雨量、價格門檻可以在 PokemonController 上調整。");
+    }
+
+    //A falling-streak particle system above the camera, used when the card is expensive
+    static ParticleSystem createRain(Camera cam, EnvironmentManager envManager)
+    {
+        //How big the scene is from the camera's point of view
+        float size = 20f;
+        if (cam != null && envManager != null && envManager.campFire_Object != null)
+            size = Mathf.Max(5f, Vector3.Distance(cam.transform.position, envManager.campFire_Object.transform.position));
+
+        GameObject go = new GameObject("Rain");
+        if (cam != null)
+        {
+            go.transform.SetParent(cam.transform, false);
+            go.transform.localPosition = new Vector3(0f, size * 0.6f, size * 0.7f);
+            go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);  //emit straight down
+        }
+
+        ParticleSystem ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = ps.main;
+        main.playOnAwake = false;
+        main.loop = true;
+        main.startLifetime = 1.6f;
+        main.startSpeed = size * 1.2f;
+        main.startSize = size * 0.006f;
+        main.startColor = new Color(0.75f, 0.8f, 0.9f, 0.6f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.maxParticles = 5000;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 0f;
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        shape.scale = new Vector3(size * 2f, size * 1.5f, 0.1f);
+
+        var renderer = go.GetComponent<ParticleSystemRenderer>();
+        renderer.renderMode = ParticleSystemRenderMode.Stretch;
+        renderer.lengthScale = 1f;
+        renderer.velocityScale = 0.05f;
+        renderer.sharedMaterial = getRainMaterial();
+
+        return ps;
+    }
+
+    static Material getRainMaterial()
+    {
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(RainMaterialPath);
+        if (mat != null)
+            return mat;
+
+        Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit") ?? Shader.Find("Particles/Standard Unlit");
+        mat = new Material(shader);
+        mat.SetColor("_BaseColor", new Color(0.8f, 0.85f, 0.95f, 0.5f));
+        //Transparent surface so the drops look light
+        if (mat.HasProperty("_Surface"))
+        {
+            mat.SetFloat("_Surface", 1f);
+            mat.SetFloat("_Blend", 0f);
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.SetInt("_ZWrite", 0);
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(RainMaterialPath));
+        AssetDatabase.CreateAsset(mat, RainMaterialPath);
+        return mat;
     }
 
     //Every part in the prefab is active; keep one item per category (the first one).
